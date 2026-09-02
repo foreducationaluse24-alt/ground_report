@@ -6,12 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "postinstall": "prisma skills sync || exit 0"
+    "lint": "eslint"
   },
   "dependencies": {
     "@extractus/article-extractor": "jsr:9.0.1-rc2",
-    "@prisma/client": "^7.10.0",
     "cheerio": "^1.2.0",
     "next": "16.3.4",
     "react": "19.2.8",
@@ -25,7 +23,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
-    "prisma": "8.0.0-rc.12",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

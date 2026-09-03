@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+
+model Article {
+  id          String   @id @default(cuid())
+  url         String   @unique
+  title       String
+  description String?
+  content     String?
+  author      String?
+  imageUrl    String?
+  source      String
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+}

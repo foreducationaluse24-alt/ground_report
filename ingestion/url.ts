@@ -1,15 +1,5 @@
 
-
-
-
-export function normalizeUrl(rawUrl: string): string {
-  const url = new URL(rawUrl);
-
-  // Remove fragment
-  url.hash = "";
-
-  // Remove tracking parameters
-  const trackingParams = [
+const trackingParams = [
     "utm_source",
     "utm_medium",
     "utm_campaign",
@@ -24,6 +14,14 @@ export function normalizeUrl(rawUrl: string): string {
     "at_campaign"
   ];
 
+
+export function normalizeUrl(rawUrl: string): string {
+  const url = new URL(rawUrl);
+
+  // Remove fragment
+  url.hash = "";
+
+  // Remove tracking parameters
   for (const param of trackingParams) {
     url.searchParams.delete(param);
   }

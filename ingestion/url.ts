@@ -16,21 +16,21 @@ const trackingParams = [
 
 
 export function normalizeUrl(rawUrl: string): string {
-  const url = new URL(rawUrl);
+  const url = new URL(rawUrl);  //convert url string into url object
 
-  // Remove fragment
-  url.hash = "";
+  // Remove fragment => #example
+  url.hash = ""; 
 
   // Remove tracking parameters
   for (const param of trackingParams) {
     url.searchParams.delete(param);
   }
 
-  // Normalize trailing slash
+  // Normalize trailing slash => remove trailing `/` at the end
   url.pathname = url.pathname.replace(/\/+$/, "");
 
-  // Normalize hostname
+  // Normalize hostname 
   url.hostname = url.hostname.toLowerCase();
 
-  return url.toString();
+  return url.toString();  //again convert url object back to a string
 }

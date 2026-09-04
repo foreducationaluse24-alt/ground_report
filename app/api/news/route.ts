@@ -1,24 +1,20 @@
-
 import { feeds } from "@/feeds/source";
 import { IngestionArticles } from "@/ingestion/ingestArticles";
 import Rss_Parser from "@/ingestion/rss";
 
-
-
-
 const Articles = async () => {
-  const result = []
+  const result = [];
 
-  for(const feed of feeds){
+  for (const feed of feeds) {
     console.log(`Processing ${feed.name} url`);
     const articles = await Rss_Parser(feed.rssUrl);
-    //console.log(articles[0])
-    const res  = await IngestionArticles(articles,feed.name);  // return success failed obj
+
+    const res = await IngestionArticles(articles, feed.name); // return success failed obj
 
     result.push({
-      source : feed.name,
-      ...res
-    })
+      source: feed.name,
+      ...res,
+    });
   }
   return Response.json(result);
 };

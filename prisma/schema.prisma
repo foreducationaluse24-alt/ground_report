@@ -15,6 +15,7 @@ model Article {
   title       String
   description String?
   content     String?
+  hashedContent String?
   author      String?
   imageUrl    String?
   source      String

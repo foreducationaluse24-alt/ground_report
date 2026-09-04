@@ -6,7 +6,7 @@ import pLimit from "p-limit";
 import { contentHashing } from "./fingerprint";
 import { isValidArticle } from "./articleValidation";
 import { Prisma } from "@/generated/prisma/client";
-import { error } from "console";
+
 
 export interface NormalizedArticle {
   url: string;
@@ -103,10 +103,10 @@ export async function IngestionArticles(
           return { status: "inserted" };
         } catch (err) {
           if (
-            error instanceof Prisma.PrismaClientKnownRequestError &&
-            error.code === "P2002"
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === "P2002"
           ) {
-            return { status: "duplicate" };
+            return { status: "duplicated" };
           }
           throw err;
         }

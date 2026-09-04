@@ -1,4 +1,3 @@
-import { extract } from "@extractus/article-extractor";
 import { normalizeUrl } from "./url";
 import { cleanArticleContent } from "@/cleaningContent/clean";
 import { prisma } from "@/lib/prisma";
@@ -6,7 +5,8 @@ import pLimit from "p-limit";
 import { contentHashing } from "./fingerprint";
 import { isValidArticle } from "./articleValidation";
 import { Prisma } from "@/generated/prisma/client";
-
+import { articleExtracter } from "./extractArticle";
+import { parseArticleDate } from "./dateValidation";
 
 export interface NormalizedArticle {
   url: string;
@@ -43,64 +43,67 @@ export async function IngestionArticles(
   const result = await Promise.allSettled(
     articles.map((rssArticle) =>
       limit(async () => {
-        const targetUrl = rssArticle.link ? rssArticle.link : rssArticle.guid;
+        const targetUrl = rssArticle.link ?? rssArticle.guid;
 
         if (!targetUrl) {
           return { status: "invalid" };
         }
 
-        //console.log(targetUrl);
-        const url = normalizeUrl(targetUrl);
-        //console.log(url);
-
-        const urlExists = await prisma.article.findUnique({
-          where: {
-            url,
-          },
-        });
-
-        if (urlExists) {
-          return { status: "duplicated" }; //to count them as promised fulfilled
-        }
-
-        const article = await extract(url);
-
-        //console.log(article);
-        if (!article) {
-          return { status: "invalid" };
-        }
-
-        const content = article.content
-          ? cleanArticleContent(article.content)
-          : null;
-        const articleValidationTest = isValidArticle(
-          article.title ?? "",
-          content,
-        );
-
-        if (!articleValidationTest) {
-          return { status: "invalid" };
-        }
-
-        const hashedContent = content ? contentHashing(content) : null;
-
-        const normalizedArticle: NormalizedArticle = {
-          url: url,
-          title: article.title ?? "",
-          description: article.description ?? null,
-          content,
-          hashedContent,
-          author: article.author ?? null,
-          imageUrl: article.image ?? null,
-          source: source,
-          publishedAt: article.published ? new Date(article.published) : null,
-        };
-
         try {
+          //console.log(targetUrl);
+          const url = normalizeUrl(targetUrl);
+          //console.log(url);
+
+          const urlExists = await prisma.article.findUnique({
+            where: {
+              url,
+            },
+          });
+
+          if (urlExists) {
+            return { status: "duplicated" }; //to count them as promised fulfilled
+          }
+
+          const article = await articleExtracter(url);
+          if (!article) {
+            return { status: "invalid" };
+          }
+
+          const content = article.content
+            ? cleanArticleContent(article.content)
+            : null;
+
+          const articleValidationTest = isValidArticle(
+            article.title ?? "",
+            content,
+          );
+
+          if (!articleValidationTest) {
+            return { status: "invalid" };
+          }
+
+          const hashedContent = content ? contentHashing(content) : null;
+
+          const normalizedArticle: NormalizedArticle = {
+            url: url,
+            title: article.title ?? "",
+            description: article.description ?? null,
+            content,
+            hashedContent,
+            author: article.author ?? null,
+            imageUrl: article.imageUrl ?? null,
+            source: source,
+            publishedAt: parseArticleDate(article.publishedAt, rssArticle.publishedAt)
+          };
+          
           await prisma.article.create({
             data: normalizedArticle,
           });
+
+
           return { status: "inserted" };
+
+
         } catch (err) {
           if (
             err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -108,6 +111,10 @@ export async function IngestionArticles(
           ) {
             return { status: "duplicated" };
           }
+          console.error("Article ingestion failed:", {
+            url: targetUrl,
+            error: err,
+          });
           throw err;
         }
       }),

@@ -12,7 +12,7 @@ export function isValidArticle(
 
   const wordCount = content.trim().split(/\s+/).length;
 
-  if (wordCount < 100) {
+  if (wordCount < 40) {
     return false;
   }
 

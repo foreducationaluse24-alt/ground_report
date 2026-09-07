@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@extractus/article-extractor": "jsr:9.0.1-rc2",
+    "@huggingface/transformers": "^4.2.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "7.10.0",
     "cheerio": "^1.2.0",

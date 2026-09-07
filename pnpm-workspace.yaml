@@ -2,7 +2,9 @@ allowBuilds:
   '@prisma/engines': true
   esbuild: set this to true or false
   msgpackr-extract: set this to true or false
+  onnxruntime-node: false
   prisma: true
+  protobufjs: false
   sharp: false
   unrs-resolver: false
   workerd: set this to true or false

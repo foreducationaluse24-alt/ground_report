@@ -8,7 +8,10 @@ const Articles = async () => {
 
   for (const feed of feeds) {
     console.log(`Processing ${feed.name} url`);
+    console.log("Processing Hindustan Times url:", feed.rssUrl);
+
     const articles = await Rss_Parser(feed.rssUrl);
+    
 
     const res = await IngestionArticles(articles, feed.name); // return success failed obj
 

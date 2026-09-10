@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import pLimit from "p-limit";
 import { contentHashing } from "./fingerprint";
 import { isValidArticle } from "./articleValidation";
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "../../generated/prisma/client";
 import { articleExtracter } from "./extractArticle";
 import { parseArticleDate } from "./dateValidation";
 
@@ -41,10 +41,7 @@ type InvalidResult = {
   status: "invalid";
 };
 
-type Result =
-  | InsertedResult
-  | DuplicateResult
-  | InvalidResult;
+type Result = InsertedResult | DuplicateResult | InvalidResult;
 
 //type guard function
 function isFulfilled<T>(
@@ -53,13 +50,9 @@ function isFulfilled<T>(
   return result.status === "fulfilled";
 }
 //type guard function
-function isInserted(
-  result: Result,
-): result is InsertedResult {
+function isInserted(result: Result): result is InsertedResult {
   return result.status === "inserted";
 }
-
-
 
 export async function IngestionArticles(
   articles: RssArticle[],
@@ -70,7 +63,7 @@ export async function IngestionArticles(
   //allsetteled did not stop even when one promise get failed
   const result = await Promise.allSettled(
     articles.map((rssArticle) =>
-      limit(async ():Promise<Result> => {
+      limit(async (): Promise<Result> => {
         const targetUrl = rssArticle.link ?? rssArticle.guid;
 
         if (!targetUrl) {
@@ -96,9 +89,15 @@ export async function IngestionArticles(
           if (!article) {
             return { status: "invalid" };
           }
+          //------------------------------------------
+          // console.log("SOURCE:", source);
+          // console.log("URL:", url);
+          
+          // console.log("EXTRACTED CONTENT:", article?.content?.slice(0, 1000));
+          //------------------------------------------
 
           const content = article.content
-            ? cleanArticleContent(article.content)
+            ? cleanArticleContent(article.content,source)
             : null;
 
           const articleValidationTest = isValidArticle(
@@ -149,27 +148,23 @@ export async function IngestionArticles(
     ),
   );
 
- const fulfilledResults = result.filter(isFulfilled);
+  const fulfilledResults = result.filter(isFulfilled);
 
-const insertedArticles = fulfilledResults
-  .map((r) => r.value)
-  .filter(isInserted);
+  const insertedArticles = fulfilledResults
+    .map((r) => r.value)
+    .filter(isInserted);
 
-const duplicateArticles = fulfilledResults.filter(
-  (r) => r.value.status === "duplicated",
-);
+  const duplicateArticles = fulfilledResults.filter(
+    (r) => r.value.status === "duplicated",
+  );
 
-const invalidArticles = fulfilledResults.filter(
-  (r) => r.value.status === "invalid",
-);
+  const invalidArticles = fulfilledResults.filter(
+    (r) => r.value.status === "invalid",
+  );
 
-const failedArticles = result.filter(
-  (r) => r.status === "rejected",
-);
+  const failedArticles = result.filter((r) => r.status === "rejected");
 
-const articleIds = insertedArticles.map(
-  (article) => article.articleId,
-);
+  const articleIds = insertedArticles.map((article) => article.articleId);
 
   return {
     msg: `Articles processed`,

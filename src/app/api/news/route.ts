@@ -1,3 +1,4 @@
+import { findCluster } from "@/clustering/findCluster";
 import { embedArticle } from "@/embedding/embedArticle";
 import { feeds } from "@/feeds/source";
 import { IngestionArticles } from "@/ingestion/ingestArticles";
@@ -5,10 +6,10 @@ import Rss_Parser from "@/ingestion/rss";
 
 const Articles = async () => {
   const result = [];
+  const clusterResult = [];
 
   for (const feed of feeds) {
-    console.log(`Processing ${feed.name} url`);
-    console.log("Processing Hindustan Times url:", feed.rssUrl);
+    console.log(`Processing ${feed.name} url : ${feed.rssUrl}`);
 
     const articles = await Rss_Parser(feed.rssUrl);
     
@@ -18,6 +19,8 @@ const Articles = async () => {
     //genrating embedding for aticles that just been saved into database
     for(const articleId of res.articleIds){
         await embedArticle(articleId);
+        const a = await findCluster(articleId);
+        clusterResult.push(a);
     }
   
     result.push({
@@ -25,7 +28,7 @@ const Articles = async () => {
       ...res,
     });
   }
-  return Response.json(result);
+  return Response.json({result,clusterResult});
 };
 
 export const GET = Articles;

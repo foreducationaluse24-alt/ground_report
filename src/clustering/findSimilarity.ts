@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
 
-export async function findSimilarArticles(articleId: string, limit = 10) {
+export async function findSimilarArticles(articleId: string, limit : number) {
   const articles = await prisma.$queryRaw<
     {
       id: string;
       title: string;
       source: string;
+      clusterId : string | null;
+      publishedAt: Date | null;
       similarity: number;
     }[]
   >`
@@ -13,6 +15,8 @@ export async function findSimilarArticles(articleId: string, limit = 10) {
       a."id",
       a."title",
       a."source",
+      a."clusterId",
+      a."publishedAt",
       1 - (
         a."embedding" <=> target."embedding"
       ) AS similarity
@@ -22,6 +26,9 @@ export async function findSimilarArticles(articleId: string, limit = 10) {
       target."id" = ${articleId}
       AND a."embedding" IS NOT NULL
       AND a."id" != ${articleId}
+      AND 1 - (
+            a."embedding" <=> target."embedding"
+        ) > 0.75
     ORDER BY
       a."embedding" <=> target."embedding"
     LIMIT ${limit}

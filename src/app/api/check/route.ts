@@ -1,4 +1,4 @@
-import { findSimilarArticles } from "@/embedding/findSimilarity";
+import { findSimilarArticles } from "@/clustering/findSimilarity";
 import { prisma } from "@/lib/prisma";
 
 const Check = async () => {
@@ -15,8 +15,7 @@ const Check = async () => {
     "title",
     "source"
   FROM "Article"
-  WHERE "embedding" IS NOT NULL
-  LIMIT 1
+  WHERE "embedding" IS NOT NULL;
 `;
 
     if (!articleRandom) {
@@ -24,13 +23,17 @@ const Check = async () => {
         error: "No embedded article found",
       });
     }
-
-    const response = await findSimilarArticles(articleRandom[0].id, 10);
+    const b = []
+    for(const a of articleRandom){
+      const response = await findSimilarArticles(a.id, 10);
+      b.push({originalArticle : a.title , similar : response});
+    }
 
     return Response.json({
-      originalArticle: articleRandom,
-      similarArticles: response,
+      b
+
     });
+
   } catch (error) {
     console.error(error);
 

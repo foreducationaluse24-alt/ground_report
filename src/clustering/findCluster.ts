@@ -1,66 +1,99 @@
 import { prisma } from "@/lib/prisma";
+import { findSimilarArticles } from "./findSimilarity";
+import { CreatingCluster } from "./creatingCluster";
 
+interface ExistingCluster {
+  type: "existing";
+  clusterId: string;
+  matchedArticleId: string;
+  similarity: number;
+  publishedAt: Date;
+}
 
-const Similarity_threshold = 0.2;
+interface NewCluster {
+  type: "new";
+  clusterId: string;
+}
 
-export async function findCluster(articleId: string) {
-  const article = await prisma.article.findUnique({
-    where: {
-      id: articleId,
-    },
-    select: {
-      id: true,
-      publishedAt: true,
-    },
-  });
+interface ClusterError {
+  type: "error";
+  error: string;
+}
 
-  if (!article) {
-    throw Error(`article not found ${articleId}`);
+type findClusterREturnTpe = ExistingCluster | NewCluster | ClusterError;
+
+const Similarity_threshold = 0.7;
+
+export async function findCluster(
+  articleId: string,
+): Promise<findClusterREturnTpe> {
+  
+  try {
+
+    const article = await prisma.article.findUnique({
+      where: {
+        id: articleId,
+      },
+      select: {
+        id: true,
+        publishedAt: true,
+      },
+    });
+
+    if (!article) {
+      throw Error(`article not found ${articleId}`);
+    }
+    const similarArticles = await findSimilarArticles(articleId, 10);
+
+    //filter
+    const similarCandidates = similarArticles.filter((candidate) => {
+      if (
+        candidate.similarity < Similarity_threshold ||
+        !candidate.publishedAt ||
+        !article.publishedAt
+      ) {
+        return false;
+      }
+
+      const timeDifference = Math.abs(
+        candidate.publishedAt.getTime() - article.publishedAt.getTime(),
+      );
+      // console.log(`time_difference : ${timeDifference}`);
+
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+
+      return timeDifference <= twentyFourHours; // true: keep this article, false : discard it
+    });
+
+    //checking if cluster already exist for this particular article
+    const existingCluster = similarCandidates.find(
+      (candidate) => candidate.clusterId !== null,
+    );
+
+    if (existingCluster) {
+      await prisma.article.update({
+        where: { id: articleId },
+        data: { clusterId: existingCluster.clusterId },
+      });
+
+      return {
+        type: "existing",
+        clusterId: existingCluster.clusterId!,
+        matchedArticleId: existingCluster.id,
+        similarity: existingCluster.similarity,
+        publishedAt: existingCluster.publishedAt!,
+      };
+    }
+
+    //Making a cluster id if cluster is not present which match
+    const clusterId = await CreatingCluster(articleId);
+
+    return {
+      type: "new",
+      clusterId: clusterId,
+    };
+  } catch (error) {
+    console.error(error);
+    return { type: "error", error: String(error) };
   }
-
-  const candidates = await prisma.$queryRaw<
-    {
-      id: string;
-      title: string;
-      source: string;
-      publishedAt: string;
-      similarity: number;
-    }[]
-  >` SELECT
-    candidate."id",
-    candidate."title",
-    candidate."source",
-    candidate."publishedAt",
-
-    1 - (
-      candidate."embedding" <=> target."embedding"
-    ) AS similarity
-
-  FROM "Article" candidate
-
-  CROSS JOIN "Article" target
-
-  WHERE
-    target."id" = ${articleId}
-
-    AND candidate."embedding" IS NOT NULL
-
-    AND candidate."id" != target."id"
-
-    AND candidate."publishedAt" IS NOT NULL
-    AND target."publishedAt" IS NOT NULL
-
-    AND candidate."publishedAt"
-      BETWEEN target."publishedAt" - INTERVAL '24 hours'
-      AND target."publishedAt" + INTERVAL '24 hours'
-
-  ORDER BY
-    candidate."embedding" <=> target."embedding"
-
-  LIMIT 20`;
-
-    const similarCandidates = candidates.filter((articles)=>articles.similarity >= Similarity_threshold)
-
-    return candidates;
-
 }

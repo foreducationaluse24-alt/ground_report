@@ -7,6 +7,8 @@ export async function addFeeds(){
         await feedQueue.add("process-feed",{
             feedName : feed.name,
             rssUrl : feed.rssUrl
+        },{
+            jobId : `${feed.name}`    //to prevent multiple job of same id to be on queue. by giving it a name bullmq does not allow same jobId job to be on the queue Simultaneously
         })
     }
 }

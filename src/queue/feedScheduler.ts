@@ -11,7 +11,7 @@ async function startScheduler() {
       name: "process-feeds", //name fo job in schedule queue
       data: {},
       opts : {
-        removeOnComplete : true
+        removeOnComplete : true,
       }
     },
     

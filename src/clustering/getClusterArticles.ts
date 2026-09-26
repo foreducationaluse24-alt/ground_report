@@ -8,7 +8,6 @@ export async function getClusterArticles(clusterId: string) {
     select: {
       id: true,
       title: true,
-      source: true,
       publishedAt: true,
     },
     orderBy: {

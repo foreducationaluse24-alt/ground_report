@@ -11,7 +11,7 @@ export async function addFeeds(){
         },{
             jobId : `${feed.name}`,    //to prevent multiple job of same id to be on queue. by giving it a name bullmq does not allow same jobId job to be on the queue Simultaneously
             removeOnComplete : true,            
-            removeDependencyOnFailure : true   //remove later
+            removeOnFail : true   //remove later
         })
         console.log(feed.name, "job id:", job.id);
     }

@@ -17,7 +17,6 @@ export interface NormalizedArticle {
   author: string | null;
   hashedContent: string | null;
   imageUrl: string | null;
-  source: string;
   publishedAt: Date | null;
   outletId : string;
 }
@@ -128,7 +127,6 @@ export async function IngestionArticles(
             outletId : id,
             author: article.author ?? null,
             imageUrl: article.imageUrl ?? null,
-            source: source,
             publishedAt: parseArticleDate(
               article.publishedAt,
               rssArticle.publishedAt,

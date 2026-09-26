@@ -17,7 +17,6 @@ model Article {
   content       String?
   author        String?
   imageUrl      String?
-  source        String
   publishedAt   DateTime?
   createdAt     DateTime               @default(now())
   hashedContent String?
@@ -26,8 +25,8 @@ model Article {
   clusterId String?
   cluster StoryCluster? @relation(fields: [clusterId],references: [id])
 
-  outletId String?
-  outlet Outlet? @relation(fields: [outletId] , references: [id])
+  outletId String
+  outlet Outlet @relation(fields: [outletId] , references: [id])
 
 }
 
@@ -45,6 +44,10 @@ model Outlet{
   name String
   domain String @unique
   articles Article[] 
+
+
+  bias String?
+  factualityScore Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

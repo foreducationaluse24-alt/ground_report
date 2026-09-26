@@ -5,7 +5,6 @@ export async function findSimilarArticles(articleId: string, limit : number) {
     {
       id: string;
       title: string;
-      source: string;
       clusterId : string | null;
       publishedAt: Date | null;
       similarity: number;
@@ -14,7 +13,6 @@ export async function findSimilarArticles(articleId: string, limit : number) {
     SELECT
       a."id",
       a."title",
-      a."source",
       a."clusterId",
       a."publishedAt",
       1 - (

@@ -7,6 +7,7 @@ import { isValidArticle } from "./articleValidation";
 import { Prisma } from "../../generated/prisma/client";
 import { articleExtracter } from "./extractArticle";
 import { parseArticleDate } from "./dateValidation";
+import { getOrCreateoutlet } from "@/outlets/getOrCreateoutlet";
 
 export interface NormalizedArticle {
   url: string;
@@ -18,6 +19,7 @@ export interface NormalizedArticle {
   imageUrl: string | null;
   source: string;
   publishedAt: Date | null;
+  outletId : string;
 }
 
 export interface RssArticle {
@@ -57,6 +59,7 @@ function isInserted(result: Result): result is InsertedResult {
 export async function IngestionArticles(
   articles: RssArticle[],
   source: string,
+  domain : string
 ) {
   const limit = pLimit(5);
 
@@ -111,12 +114,18 @@ export async function IngestionArticles(
 
           const hashedContent = content ? contentHashing(content) : null;
 
+          //searching or creating an outlet table
+          const {id} = await getOrCreateoutlet(source,domain);
+          
+
+
           const normalizedArticle: NormalizedArticle = {
             url: url,
             title: article.title ?? "",
             description: article.description ?? null,
             content,
             hashedContent,
+            outletId : id,
             author: article.author ?? null,
             imageUrl: article.imageUrl ?? null,
             source: source,

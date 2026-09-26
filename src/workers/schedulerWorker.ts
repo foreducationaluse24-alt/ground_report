@@ -9,9 +9,11 @@ const connection = new IORedis(process.env.REDIS_URL!,{
 //listening to feed-shedular queue
 const shedularWorker = new Worker("feed-scheduler",
     async (job) =>{
-        console.log(`runnning shedular job ${job.id}`);
+        console.log("-------------------------------------")
+        console.log(`runnning schedular job : [${job.id}]`);
         await addFeeds();
-        console.log("all feeds added to feed queue")
+        console.log("All feeds added to feed queue");
+        
     },
     {
         connection 
@@ -20,10 +22,12 @@ const shedularWorker = new Worker("feed-scheduler",
 
 
 shedularWorker.on("completed",(job)=>{
-    console.log(`Scheduler job ${job.id} completed`);
+    console.log(`Scheduler job ${job.id} completed (THIS IS ON COMPLETED LOG)`);
+    console.log("-------------------------------------")
 })
 
 
 shedularWorker.on("failed",(job,err)=>{
     console.log(`Scheduler job ${job?.id} completed by error : ${err}`);
+    console.log("-------------------------------------")
 })

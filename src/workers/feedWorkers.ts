@@ -11,23 +11,30 @@ const connection = new IORedis(process.env.REDIS_URL!, {
 });
 
 const feedWorker = new Worker(
-  "feed-ingestion",
+  "feed-ingestion", //"feed-ingestion" => That's how BullMQ knows:This worker handles jobs from this queue.
   async (job) => {
-    //"feed-ingestion" => That's how BullMQ knows:This worker handles jobs from this queue.
-
-    const { feedName, rssUrl } = job.data;
-
+    const { feedName, rssUrl, domain } = job.data;
+    console.log("------------------------------------------")
+    console.log({
+      feedName,
+      rssUrl,
+      domain,
+    });
     const articles = await Rss_Parser(rssUrl);
-    const res = await IngestionArticles(articles, feedName);
+    const res = await IngestionArticles(articles, feedName, domain);
     const { inserted, duplicatedArticles, Totalcount, failed, invalid } = res;
 
     for (let articleId of res.articleIds) {
+      console.log(`Starting embedding: ${articleId}`);
       await embedArticle(articleId);
+      console.log(`Embedding completed: ${articleId}`);
+
       await findCluster(articleId);
+      console.log(`Clustering completed: ${articleId}`);
     }
     console.log(`Finished feed: ${feedName}`);
-    console.log({Totalcount,inserted,duplicatedArticles,failed,invalid});
-    
+    console.log({ Totalcount, inserted, duplicatedArticles, failed, invalid });
+
     //BullMQ records the returned value as the job's result.
     return {
       Totalcount,
@@ -39,14 +46,16 @@ const feedWorker = new Worker(
   },
   {
     connection,
-    concurrency : 3 //It means this worker can process up to 3 jobs at the same time.
+    concurrency: 1, //It means this worker can process up to 3 jobs at the same time.
   },
 );
 
 feedWorker.on("completed", (job) => {
-  console.log(`job ${job.id} completed`);
+  console.log(`job ${job.id} completed (coming from feedworker.on)`);
+  console.log("------------------------------------------")
 });
 
 feedWorker.on("failed", (job, err) => {
   console.log(`job ${job?.id} failed with Erorr ${err}`);
+  console.log("------------------------------------------")
 });

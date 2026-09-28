@@ -7,6 +7,15 @@ datasource db {
   provider = "postgresql"
 }
 
+enum bias {
+    LEFT
+    LEAN_LEFT
+    CENTRE
+    LEAN_RIGHT
+    RIGHT
+}
+
+
 
 
 model Article {
@@ -46,7 +55,7 @@ model Outlet{
   articles Article[] 
 
 
-  bias String?
+  bias bias?
   factualityScore Float?
 
   createdAt DateTime @default(now())

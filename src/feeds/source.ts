@@ -12,7 +12,7 @@ export const feeds: FeedSource[] = [
   },
   {
     name: "BBC News",
-    rssUrl: "https://feeds.bbci.co.uk/news/rss.xml",
+    rssUrl: "https://feeds.bbci.co.uk/news/world/asia/india/rss.xml",
     domain: "bbc.com",
   },
   {
@@ -22,11 +22,13 @@ export const feeds: FeedSource[] = [
   },
   {
     name: "Indian Express",
-    rssUrl: "https://indianexpress.com/feed",
+    rssUrl: "https://indianexpress.com/section/india/feed/",
     domain: "indianexpress.com",
   },
 ];
 
-//the hindu
+//
+//https://indianexpress.com/feed
+//the hindu 
 //bbc
 //hindustan times

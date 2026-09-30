@@ -1,4 +1,3 @@
-import { findSimilarArticles } from "@/clustering/findSimilarity";
 import { prisma} from "@/lib/prisma";
 
 const Check = async () => {

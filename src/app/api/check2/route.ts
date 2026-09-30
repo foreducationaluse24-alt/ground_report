@@ -1,4 +1,4 @@
-import Rss_Parser from "@/ingestion/rss";
+import Rss_Parser from "@/lib/rss";
 
 const check2 = async () => {
   try {

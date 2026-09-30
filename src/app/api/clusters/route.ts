@@ -23,7 +23,6 @@ export async function GET(req : Request) {
          select: {
            id: true,
            title: true,
-           source: true,
            publishedAt: true,
            url: true,
          },

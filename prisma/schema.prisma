@@ -7,17 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum bias {
-    LEFT
-    LEAN_LEFT
-    CENTRE
-    LEAN_RIGHT
-    RIGHT
-}
-
-
-
-
 model Article {
   id            String                 @id @default(cuid())
   url           String                 @unique
@@ -30,34 +19,37 @@ model Article {
   createdAt     DateTime               @default(now())
   hashedContent String?
   embedding     Unsupported("vector")?
-
-  clusterId String?
-  cluster StoryCluster? @relation(fields: [clusterId],references: [id])
-
-  outletId String
-  outlet Outlet @relation(fields: [outletId] , references: [id])
-
+  clusterId     String?
+  outletId      String
+  cluster       StoryCluster?          @relation(fields: [clusterId], references: [id])
+  outlet        Outlet                 @relation(fields: [outletId], references: [id])
 }
 
-
-model StoryCluster{
-  id String @id @default(cuid())
-  articles Article[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model StoryCluster {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  articles  Article[]
 }
 
-
-model Outlet{
-  id String @id @default(cuid())
-  name String
-  domain String @unique
-  articles Article[] 
-
-
-  bias bias?
+model Outlet {
+  id              String    @id @default(cuid())
+  name            String
+  domain          String    @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   factualityScore Float?
+  bias            bias?
+  biasSource      String?
+  biasSourceUrl   String?
+  country         String?
+  articles        Article[]
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum bias {
+  LEFT
+  LEAN_LEFT
+  CENTRE
+  LEAN_RIGHT
+  RIGHT
 }

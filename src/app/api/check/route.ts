@@ -1,38 +1,27 @@
 import { findSimilarArticles } from "@/clustering/findSimilarity";
-import { prisma } from "@/lib/prisma";
+import { prisma} from "@/lib/prisma";
 
 const Check = async () => {
   try {
-    const articleRandom = await prisma.$queryRaw<
-      {
-        id: string;
-        title: string;
-        source: string;
-      }[]
-    >`
-  SELECT
-    "id",
-    "title",
-    "source"
-  FROM "Article"
-  WHERE "embedding" IS NOT NULL;
-`;
+    const articles = await prisma.article.findMany({
+    where: {
+      clusterId : "cmuju4bv6002yboydod7i33hs",
+    },
+    select: {
+      id: true,
+      title: true,
+      outlet: {
+        select: {
+          name: true,
+          domain: true,
+          bias: true,
+          factualityScore: true,
+        },
+      },
+    },
+  });
 
-    if (!articleRandom) {
-      return Response.json({
-        error: "No embedded article found",
-      });
-    }
-    const b = []
-    for(const a of articleRandom){
-      const response = await findSimilarArticles(a.id, 10);
-      b.push({originalArticle : a.title , similar : response});
-    }
-
-    return Response.json({
-      b
-
-    });
+  return Response.json(articles);
 
   } catch (error) {
     console.error(error);

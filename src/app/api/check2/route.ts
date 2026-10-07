@@ -3,7 +3,7 @@ import Rss_Parser from "@/lib/rss";
 const check2 = async () => {
   try {
     const articles = await Rss_Parser(
-      "https://publish.tribuneindia.com/newscategory/top-headlines/feed/",
+      "https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms",
     );
     const response = await fetch(
       "https://news.google.com/rss/articles/CBMiqgFBVV95cUxOWEtXZ3gxSXRQejgzMEFqZFdudGYwSWdvUDB5cGVmckloeG9OLWR0Ml8xbWVmLTZjSmI0TWw5QnQ4WGY5cVppYjVDbUhZYUpTSVhFUFFtbjExeUEwRTBVSVUxRTRxRFU3M0hvUXdKcWpVRndxSjJuNEZXc0VtRnhfa1ZiLThJSWdIcFlZbjBLTFlJZHc0RE5QVFIzUkE1SkZyQTFXT1RxMWlWZw?oc=5url",

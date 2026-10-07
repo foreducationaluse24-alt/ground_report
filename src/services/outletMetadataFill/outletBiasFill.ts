@@ -3,11 +3,11 @@
   interface outletMetadataType {
     name: string;
     domain: string;
-    bias: "LEFT" | "LEAN_LEFT" | "CENTRE" | "LEAN_RIGHT" | "RIGHT";
+    bias: "LEFT" | "LEAN_LEFT" | "CENTRE" | "LEAN_RIGHT" | "RIGHT" | null;
     country: string;
-    factualityScore: number;
-    biasSource: string;
-    biasSourceUrl: string;
+    factualityScore: number | null;
+    biasSource: string | null;
+    biasSourceUrl: string | null;
   }
   export const outletMetadata: outletMetadataType[] = [
     {
@@ -45,6 +45,72 @@
       country: "India",
       biasSource: "MBFC",
       biasSourceUrl: "https://mediabiasfactcheck.com/the-indian-express/",
+    },{
+      name : "Firstpost",
+      domain : "firtpost.com",
+      bias : "LEAN_RIGHT",
+      factualityScore : 3.1,
+      country : "India",
+      biasSource : "MBFC",
+      biasSourceUrl : "https://mediabiasfactcheck.com/first-post/"
+    },{
+      name : "NDTV News",
+      domain : "ndtv.com",
+      bias : "LEAN_RIGHT",
+      factualityScore : 6.2,
+      country : "India",
+      biasSource : "MBFC",
+      biasSourceUrl : "https://mediabiasfactcheck.com/ndtv/"
+    },
+    {
+      name : "FreepressJournal",
+      domain : "freepressjournal.in",
+      bias : null,
+      country : "India",
+      factualityScore : null,
+      biasSource : null,
+      biasSourceUrl : null
+    },{
+      name : "Times Of India",
+      domain : "timesofindia.com",
+      bias : "LEAN_RIGHT",
+      factualityScore : 5.1,
+      country : "India",
+      biasSource : "MBFC",
+      biasSourceUrl : "https://mediabiasfactcheck.com/times-of-india/"
+    },{
+       name: "India TV News",
+       domain : "indiatvnews.com",
+       bias : "LEAN_RIGHT",
+       factualityScore : 2.2,
+       country : "India",
+       biasSource : "MBFC",
+       biasSourceUrl : "https://mediabiasfactcheck.com/india-tv/"
+    },{
+      name : "Tribune India News",
+      domain : "tribuneindia.com",
+      bias : "LEAN_RIGHT",
+      factualityScore : 4.8,
+      country : "India",
+      biasSource : "MBFC",
+      biasSourceUrl : "https://mediabiasfactcheck.com/the-tribune-india-bias/"
+    },{
+      name : "India Today",
+      domain : "indiatoday.in",
+      bias : "LEAN_RIGHT",
+      factualityScore : 5.0,
+      country : "India",
+      biasSource : "MBFC",
+      biasSourceUrl : "https://mediabiasfactcheck.com/india-today/"
+    },
+    {
+      name : "The Wire",
+      domain : "thewire.in",
+      bias : "LEAN_RIGHT",
+      factualityScore : 2.9,
+      country : "India",
+      biasSource : "MBFC",
+      biasSourceUrl : "https://mediabiasfactcheck.com/the-wire-india/"
     },
   ];
 

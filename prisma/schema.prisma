@@ -8,21 +8,27 @@ datasource db {
 }
 
 model Article {
-  id            String                 @id @default(cuid())
-  url           String                 @unique
-  title         String
-  description   String?
-  content       String?
-  author        String?
-  imageUrl      String?
-  publishedAt   DateTime?
-  createdAt     DateTime               @default(now())
-  hashedContent String?
-  embedding     Unsupported("vector")?
-  clusterId     String?
-  outletId      String
-  cluster       StoryCluster?          @relation(fields: [clusterId], references: [id])
-  outlet        Outlet                 @relation(fields: [outletId], references: [id])
+  id              String                 @id @default(cuid())
+  url             String                 @unique
+  title           String
+  description     String?
+  content         String?
+  author          String?
+  imageUrl        String?
+  publishedAt     DateTime?
+  createdAt       DateTime               @default(now())
+  hashedContent   String?
+  embedding       Unsupported("vector")?
+  clusterId       String
+  outletId        String
+  cluster         StoryCluster           @relation(fields: [clusterId], references: [id])
+  outlet          Outlet                 @relation(fields: [outletId], references: [id])
+  ArticleAnalysis ArticleAnalysis?
+  FactCheck       FactCheck[]
+
+  @@index([clusterId])
+  @@index([outletId])
+  @@index([publishedAt])
 }
 
 model StoryCluster {
@@ -46,10 +52,67 @@ model Outlet {
   articles        Article[]
 }
 
+model ArticleAnalysis {
+  id                   String              @id
+  articleId            String              @unique
+  loadedWordCount      Int?
+  emotionalWordCount   Int?
+  sensationalWordCount Int?
+  authorOpinionDensity Float?
+  attributionQuality   AttributionQuality?
+  analyzeAt            DateTime            @default(now())
+  Article              Article             @relation(fields: [articleId], references: [id])
+}
+
+model FactCheck {
+  id                  String                @id @default(cuid())
+  articleId           String
+  requestedBy         String
+  reason              String
+  status              FactCheckStatus       @default(PENDING)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  Article             Article               @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  FactCheckAssessment FactCheckAssessment[]
+}
+
+model FactCheckAssessment {
+  id          String           @id
+  factCheckId String
+  userId      String
+  verdict     CommunityVerdict
+  reasoning   String
+  evidenceUrl String?
+  createdAt   DateTime         @default(now())
+  FactCheck   FactCheck        @relation(fields: [factCheckId], references: [id], onDelete: Cascade)
+
+  @@unique([factCheckId, userId])
+}
+
 enum bias {
   LEFT
   LEAN_LEFT
   CENTRE
   LEAN_RIGHT
   RIGHT
+}
+
+enum AttributionQuality {
+  HIGH
+  LOW
+  MEDIUM
+}
+
+enum CommunityVerdict {
+  TRUE
+  FALSE
+  MISLEADING
+  UNVERIFIED
+}
+
+enum FactCheckStatus {
+  PENDING
+  IN_REVIEW
+  COMPLETED
+  REJECTED
 }
